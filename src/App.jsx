@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
   Target, 
   Users, 
@@ -8,7 +8,7 @@ import {
   Info, 
 } from 'lucide-react';
 
-// --- DATA FROM CSV ---
+// --- DATA FROM CSV CON ANÁLISIS EXPERTO MANUAL ---
 const rawData = [
   {
     name: "Ahora en AutoR tus momentos se vuelven inolvidables al instante",
@@ -19,7 +19,12 @@ const rawData = [
     impressions: 24454,
     cpr: 4254,
     spent: 199975,
-    image: "🥂"
+    image: "🥂",
+    analysis: {
+      verdict: "⚠️ ÁNGULO MUY AMPLIO",
+      insight: "La promesa 'momentos inolvidables' es un cliché en restauración. Al no haber un gancho específico (un plato, un precio o una fecha), el usuario no siente urgencia. El CPR de $4,200 indica que se compite por atención sin una oferta clara.",
+      action: "Cambiar el copy a situaciones específicas: 'Celebra tu Aniversario aquí'. Segmentar por 'Aniversario en los próximos 30 días'."
+    }
   },
   {
     name: "Historia Cumpleaños 8/10/2025",
@@ -30,7 +35,12 @@ const rawData = [
     impressions: 18436,
     cpr: 3570,
     spent: 99964,
-    image: "🎂"
+    image: "🎂",
+    analysis: {
+      verdict: "⚖️ NICHO COSTOSO",
+      insight: "Aunque el ángulo es bueno (cumpleaños), el costo es alto ($3,570) para una Historia. Probablemente la segmentación fue muy abierta y se mostró el anuncio a gente que no cumplía años en octubre.",
+      action: "Usar la segmentación nativa de Meta: 'Amigos de personas que cumplen años en 0-7 días' o 'Cumpleaños en el mes actual'."
+    }
   },
   {
     name: "Historia Menú Domingos",
@@ -41,7 +51,12 @@ const rawData = [
     impressions: 26549,
     cpr: 4991,
     spent: 149759,
-    image: "🍛"
+    image: "🍛",
+    analysis: {
+      verdict: "❌ FATIGA DE FRECUENCIA",
+      insight: "Fíjese en las impresiones vs alcance (2.6x de frecuencia). Se mostró el anuncio casi 3 veces a la misma gente y no compraron. El domingo es un día de decisión rápida; si no convierten a la primera, no lo harán a la tercera.",
+      action: "Limitar la campaña a correr solo Viernes, Sábado y Domingo (Dayparting). Cambiar la foto del plato cada semana."
+    }
   },
   {
     name: "Hay momentos que merecen celebrarse con sabor, estilo y emoción.",
@@ -52,7 +67,12 @@ const rawData = [
     impressions: 14071,
     cpr: 7870,
     spent: 149533,
-    image: "✨"
+    image: "✨",
+    analysis: {
+      verdict: "🎯 OBJETIVO DESALINEADO",
+      insight: "El título vende una experiencia sensorial ('celebrar', 'emoción'), no un producto de urgencia. Al configurar la campaña con objetivo 'Mensajes', forzamos una venta dura sobre un contenido inspiracional. El costo alto ($7,870) no es fallo del anuncio, es fallo de solicitar la métrica equivocada.",
+      action: "Cambiar el objetivo de la campaña a 'Reconocimiento'. Dejar que el anuncio atraiga curiosos, y que el perfil se encargue de cerrar la venta después."
+    }
   },
   {
     name: "Tu antojo de autor llega hasta tu puerta.",
@@ -63,7 +83,12 @@ const rawData = [
     impressions: 15032,
     cpr: 2953,
     spent: 106331,
-    image: "🛵"
+    image: "🛵",
+    analysis: {
+      verdict: "✅ CONVENIENCIA",
+      insight: "El delivery tiene menos fricción psicológica que ir al restaurante. Un CPR de $2,900 es saludable. Funciona porque resuelve un problema inmediato ('tengo hambre, no quiero salir').",
+      action: "Activar pauta meteorológica: Aumentar presupuesto un 50% los días que llueve en Cúcuta. El delivery explota con lluvia."
+    }
   },
   {
     name: "Somos AutoR ✍️ 🔥",
@@ -74,7 +99,12 @@ const rawData = [
     impressions: 1331,
     cpr: 90, 
     spent: 3883,
-    image: "🔥"
+    image: "🔥",
+    analysis: {
+      verdict: "🚀 TRÁFICO BARATO",
+      insight: "Ojo aquí: $90 pesos por visita es regalado. Se está llenando el perfil de gente interesada por casi nada. Esta campaña es la gasolina para las campañas de retargeting.",
+      action: "Mantener 'Always On' con presupuesto bajo ($5k/día). Crear Público Personalizado de 'Visitantes al perfil 30 días' y vender la cena allí."
+    }
   },
   {
     name: "Descubre nuestros menús diseñados para compartir",
@@ -85,7 +115,12 @@ const rawData = [
     impressions: 40430,
     cpr: 3603,
     spent: 349498,
-    image: "🥗"
+    image: "🥗",
+    analysis: {
+      verdict: "⚖️ TICKET ALTO",
+      insight: "Al hablar de 'compartir', el ticket promedio sube. Un CPR de $3,600 es aceptable si vienen grupos de 4 personas. El costo sube porque coordinar un grupo es más difícil que ir solo.",
+      action: "Enfocar el copy al organizador del grupo: 'Queda bien con su equipo/familia'. Probar botón 'Reservar Mesa' en lugar de WhatsApp."
+    }
   },
   {
     name: "Reuniones que se disfrutan mejor con buena comida",
@@ -96,7 +131,12 @@ const rawData = [
     impressions: 57153,
     cpr: 5298,
     spent: 349704,
-    image: "🤝"
+    image: "🤝",
+    analysis: {
+      verdict: "👥 ESTRATEGIA SOCIAL",
+      insight: "El título apunta a 'Reuniones' y grupos. Esta es una decisión social que requiere consultar con otros, no una compra impulsiva individual. Pedir un WhatsApp directo ante un evento eleva el costo ($5,298).",
+      action: "Cambiar el objetivo a 'Interacción' (Comentarios/Compartir). Los resultados aquí no son el chat, es que la gente etiquete al jefe o a los amigos en los comentarios para organizar el plan. Eso da alcance viral gratuito."
+    }
   },
   {
     name: "Mini carta (Adelanto disponible 13 nov - 30 dic)",
@@ -107,7 +147,12 @@ const rawData = [
     impressions: 18850,
     cpr: 2054,
     spent: 149943,
-    image: "📜"
+    image: "📜",
+    analysis: {
+      verdict: "💎 EFECTO FOMO",
+      insight: "El mejor ejemplo de psicología de consumo. Al poner fecha límite (30 dic), se activó el sesgo de escasez (FOMO). La gente actuó rápido ($2,054) por miedo a perderse la novedad.",
+      action: "REPLICAR MENSUALMENTE. Crear la 'Semana del Chef' o 'Plato Fantasma' (solo disponible 3 días). La urgencia vende."
+    }
   },
   {
     name: "Desde hoy puedes disfrutar nuestro menú especial",
@@ -118,7 +163,12 @@ const rawData = [
     impressions: 24462,
     cpr: 2724,
     spent: 149835,
-    image: "🍽️"
+    image: "🍽️",
+    analysis: {
+      verdict: "✅ CONSTANCIA",
+      insight: "Un CPR sólido ($2,724). La palabra 'Hoy' y 'Especial' funcionan bien juntas. Es una campaña estable que sostiene la facturación diaria sin grandes picos ni caídas.",
+      action: "Usar esta estructura para días flojos (Martes/Miércoles). 'Solo por hoy miércoles: Menú especial'."
+    }
   },
   {
     name: "Nuevos platos, nuevos antojos",
@@ -129,7 +179,12 @@ const rawData = [
     impressions: 30409,
     cpr: 2426,
     spent: 249932,
-    image: "😋"
+    image: "😋",
+    analysis: {
+      verdict: "💎 NOVEDAD",
+      insight: "El cerebro humano busca novedad y dopamina. CPR excelente ($2,426) con alto volumen (103 chats). Las fotos de comida 'porn food' (primer plano) suelen ser las responsables aquí.",
+      action: "Rotación creativa obligatoria. Una vez el cliente ve el plato nuevo, deja de ser nuevo. Lanzar fotos nuevas cada 10 días."
+    }
   },
   {
     name: "Prepárate para el primer all you can drink wine de Cúcuta",
@@ -140,7 +195,12 @@ const rawData = [
     impressions: 34027,
     cpr: 1287,
     spent: 199500,
-    image: "🍷"
+    image: "🍷",
+    analysis: {
+      verdict: "🦄 EL UNICORNIO",
+      insight: "Esto es una Masterclass. CPR ridículamente bajo ($1,287). ¿Por qué? 1. Propuesta de Valor Irresistible (Ilimitado). 2. Primicia ('El primero en Cúcuta'). 3. Nicho aspiracional (Vino). Rompió el mercado.",
+      action: "ESCALAR AGRESIVAMENTE. Crear franquicia de eventos: 'All you can Gin', 'Noche de Tapas Ilimitadas'. Asignar el 40% del presupuesto aquí."
+    }
   }
 ];
 
@@ -230,24 +290,6 @@ const CampaignCard = ({ data }) => {
   const isEfficient = data.cpr < 3000;
   const isExpensive = data.cpr > 5000;
   
-  // Explicación sencilla del análisis
-  const simpleAnalysis = useMemo(() => {
-    let text = "";
-    let verdict = "";
-    
-    if (data.cpr < 2500) {
-      verdict = "💎 ÉXITO";
-      text = "Este anuncio fue un ganador absoluto. El costo fue bajísimo y generó mucho interés. Claramente la oferta de escasez o evento funcionó.";
-    } else if (data.cpr > 6000) {
-      verdict = "🔴 COSTOSO";
-      text = "Este anuncio nos costó mucho dinero por cada cliente. La imagen genérica o el mensaje 'institucional' no motivó a la acción.";
-    } else {
-      verdict = "⚖️ PROMEDIO";
-      text = "Cumplió su función pero no destacó. Mantuvo un flujo de mensajes constante pero a un precio estándar.";
-    }
-    return { verdict, text };
-  }, [data]);
-
   return (
     <LuxuryCard className="mb-6 hover:border-yellow-500/30 transition-all duration-300">
       <div 
@@ -261,8 +303,8 @@ const CampaignCard = ({ data }) => {
           
           <div className="flex-1">
             <div className="flex flex-wrap gap-2 mb-2">
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${isEfficient ? 'border-green-500 text-green-400' : isExpensive ? 'border-red-500 text-red-400' : 'border-yellow-500 text-yellow-400'}`}>
-                {simpleAnalysis.verdict}
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${isEfficient ? 'border-green-500 text-green-400' : isExpensive ? 'border-purple-500 text-purple-400' : 'border-yellow-500 text-yellow-400'}`}>
+                {data.analysis.verdict}
               </span>
               <span className="text-[10px] text-gray-400 uppercase tracking-wider border border-gray-700 px-2 py-0.5 rounded">
                 {data.indicator.includes("WhatsApp") ? "Mensajes" : "Visitas Perfil"}
@@ -273,11 +315,11 @@ const CampaignCard = ({ data }) => {
 
           <div className="text-left md:text-right mt-2 md:mt-0 w-full md:w-auto bg-black/20 md:bg-transparent p-3 md:p-0 rounded-lg">
             <p className="text-xs text-gray-400 uppercase">Costo por Cliente</p>
-            <p className={`text-xl font-bold font-mono ${isEfficient ? 'text-green-400' : isExpensive ? 'text-red-400' : 'text-yellow-400'}`}>
+            <p className={`text-xl font-bold font-mono ${isEfficient ? 'text-green-400' : isExpensive ? 'text-purple-400' : 'text-yellow-400'}`}>
               {formatCurrency(data.cpr)}
             </p>
             <p className="text-[10px] text-gray-500 mt-1">
-              (Lo que pagaste por cada chat)
+              (Lo que se pagó por cada chat)
             </p>
           </div>
         </div>
@@ -290,44 +332,40 @@ const CampaignCard = ({ data }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <h4 className="text-yellow-500 text-sm font-bold mb-3 flex items-center gap-2">
-                <Target size={16} /> ¿Qué logramos aquí?
+                <Target size={16} /> Métricas Clave
               </h4>
               <ul className="space-y-3">
                 <li className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                  <span className="text-gray-400">Mensajes recibidos:</span>
-                  <span className="text-white font-bold">{data.results} personas</span>
+                  <span className="text-gray-400">Resultados:</span>
+                  <span className="text-white font-bold">{data.results}</span>
                 </li>
                 <li className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
                   <span className="text-gray-400 flex items-center gap-1">
-                    Dinero invertido <Tooltip title="Dinero Gastado" content="El total de plata que le pagaste a Facebook por este anuncio específico." />:
+                    Inversión:
                   </span>
                   <span className="text-white font-bold">{formatCurrency(data.spent)}</span>
                 </li>
                 <li className="flex justify-between items-center text-sm">
                   <span className="text-gray-400 flex items-center gap-1">
-                    Visto por <Tooltip title="Alcance" content="Número de personas ÚNICAS que vieron tu anuncio. Imagina que repartiste este número de volantes a personas diferentes." />:
+                    Alcance:
                   </span>
-                  <span className="text-white font-bold">{data.reach.toLocaleString()} personas</span>
+                  <span className="text-white font-bold">{data.reach.toLocaleString()}</span>
                 </li>
               </ul>
             </div>
 
             <div className="bg-white/5 p-4 rounded-xl border border-white/5">
               <h4 className="text-yellow-500 text-sm font-bold mb-2 flex items-center gap-2">
-                <MessageCircle size={16} /> Conclusión de Resultados
+                <MessageCircle size={16} /> Análisis del Trafficker
               </h4>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                "{simpleAnalysis.text}"
+              <p className="text-gray-300 text-sm leading-relaxed mb-4 italic">
+                "{data.analysis.insight}"
               </p>
               
               <div className="bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
-                <p className="text-xs text-yellow-200 font-bold uppercase mb-1">Aprendizaje para Febrero:</p>
-                <p className="text-xs text-gray-300">
-                  {isEfficient 
-                    ? "✅ MODELO A SEGUIR: Este formato funciona. Para la próxima campaña, debemos crear 3 variaciones de este mismo anuncio (mismo estilo, diferente texto)." 
-                    : isExpensive 
-                    ? "❌ CORRECCIÓN NECESARIA: Este tipo de contenido 'genérico' no conecta. Para la próxima, descartar fotos de archivo y usar videos reales (UGC) o fotos de platos primer plano." 
-                    : "⚖️ OPORTUNIDAD DE MEJORA: La audiencia funciona, pero el anuncio le faltó fuerza. Para la próxima, intentar una oferta más agresiva o un 'Call to Action' más directo."}
+                <p className="text-xs text-yellow-200 font-bold uppercase mb-1">Estrategia sugerida:</p>
+                <p className="text-xs text-gray-300 font-medium">
+                  {data.analysis.action}
                 </p>
               </div>
             </div>
@@ -356,6 +394,23 @@ export default function App() {
 
   return (
     <div className="min-h-screen font-sans" style={{ backgroundColor: THEME.primary, color: THEME.text }}>
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+          body { font-family: 'Poppins', sans-serif; }
+          .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+          .animate-fade-in-down { animation: fadeInDown 0.3s ease-in-out; }
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+          
+          /* Custom Scrollbar */
+          ::-webkit-scrollbar { width: 8px; }
+          ::-webkit-scrollbar-track { background: #1B2E26; }
+          ::-webkit-scrollbar-thumb { background: #C8A764; border-radius: 4px; }
+          ::-webkit-scrollbar-thumb:hover { background: #E8D4A6; }
+        `}
+      </style>
+      
       {/* Top Bar - Mobile Optimized */}
       <nav className="sticky top-0 z-40 backdrop-blur-xl border-b border-white/5 bg-black/20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -380,7 +435,7 @@ export default function App() {
             Resultados Trimestrales
           </h2>
           <p className="text-gray-400 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
-            Hemos analizado dónde se fue cada peso de tu inversión. Aquí te mostramos qué funcionó de maravilla y qué debemos apagar para febrero.
+            Hemos analizado dónde se fue cada peso de la inversión. Aquí mostramos qué funcionó de maravilla y qué se debe apagar para febrero.
           </p>
         </div>
 
@@ -390,27 +445,27 @@ export default function App() {
             icon={DollarSign} 
             title="Dinero Invertido" 
             value={formatCurrency(totalSpent)} 
-            explanation="Es la suma total de lo que le pagaste a Meta (Facebook/Instagram) durante estos 3 meses por todos los anuncios."
+            explanation="Es la suma total de lo que se pagó a Meta (Facebook/Instagram) durante estos 3 meses por todos los anuncios."
           />
           <KpiCard 
             icon={MessageCircle} 
             title="Clientes Interesados" 
             value={totalResults} 
             trend="good"
-            explanation="Número total de personas que hicieron clic y llegaron a tu WhatsApp o visitaron tu perfil. ¡Son leads calientes!"
+            explanation="Número total de personas que hicieron clic y llegaron al WhatsApp o visitaron el perfil. ¡Son leads calientes!"
           />
           <KpiCard 
             icon={Users} 
             title="Personas Alcanzadas" 
             value={totalReach.toLocaleString()} 
-            explanation="La cantidad de gente ÚNICA que vio tu marca. Si una persona lo ve 10 veces, cuenta como 1 persona alcanzada."
+            explanation="La cantidad de gente ÚNICA que vio la marca. Si una persona lo ve 10 veces, cuenta como 1 persona alcanzada."
           />
           <KpiCard 
             icon={Target} 
             title="Costo Promedio" 
             value={formatCurrency(avgCPR)} 
             trend={avgCPR < 3500 ? 'good' : 'bad'}
-            explanation="En promedio, esto es lo que te cuesta que 1 persona te escriba. Si baja, es mejor (más barato). Si sube, es peor."
+            explanation="En promedio, esto es lo que le cuesta a la empresa que 1 persona escriba. Si baja, es mejor (más barato). Si sube, es peor."
           />
         </div>
 
@@ -421,7 +476,7 @@ export default function App() {
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="bg-yellow-500 text-black px-3 py-1 rounded text-xs font-bold uppercase">Tu Estrategia 2026</span>
+                  <span className="bg-yellow-500 text-black px-3 py-1 rounded text-xs font-bold uppercase">Estrategia Empresarial 2026</span>
                 </div>
                 <h3 className="text-2xl md:text-4xl font-bold text-white mb-4">
                   El secreto fue la <span className="text-yellow-400">"Escasez"</span>
@@ -430,7 +485,7 @@ export default function App() {
                   Analizando los datos, descubrimos algo importante: <br/><br/>
                   Cuando publicamos anuncios "bonitos" de marca ("Momentos inolvidables"), la gente los ignora y salen caros ($4,200+). 
                   <br/><br/>
-                  Pero cuando publicamos <strong>Eventos o Promociones Limitadas</strong> ("All you can drink" o "Mini carta por días"), la gente corre a escribirte y te sale baratísimo ($1,200).
+                  Pero cuando publicamos <strong>Eventos o Promociones Limitadas</strong> ("All you can drink" o "Mini carta por días"), la gente corre a escribirte y sale baratísimo ($1,200).
                 </p>
                 
                 <div className="bg-black/30 p-4 rounded-xl border-l-4 border-yellow-500">
@@ -444,7 +499,7 @@ export default function App() {
                   <Zap size={48} className="text-yellow-400 mb-4" />
                   <p className="text-white font-bold text-lg">Potencial de Ahorro</p>
                   <p className="text-3xl font-bold text-green-400 my-2">40%</p>
-                  <p className="text-xs text-gray-400">Si aplicamos esta estrategia, podríamos reducir tu gasto publicitario casi a la mitad manteniendo los mismos resultados.</p>
+                  <p className="text-xs text-gray-400">Si se aplica esta estrategia, se podría reducir el gasto publicitario casi a la mitad manteniendo los mismos resultados.</p>
                 </div>
               </div>
             </div>
@@ -456,7 +511,7 @@ export default function App() {
           <div className="flex flex-col md:flex-row justify-between items-end md:items-center border-b border-white/10 pb-4">
             <div>
               <h3 className="text-2xl font-bold text-white">Análisis de Anuncios</h3>
-              <p className="text-sm text-gray-500 mt-1">Toca cualquier tarjeta para ver el detalle</p>
+              <p className="text-sm text-gray-500 mt-1">Toque cualquier tarjeta para ver el detalle</p>
             </div>
             
             <div className="flex gap-2 w-full md:w-auto mt-4 md:mt-0 bg-black/20 p-1 rounded-lg">
