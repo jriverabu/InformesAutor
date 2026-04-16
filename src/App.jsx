@@ -1,226 +1,187 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { 
+  BarChart3, 
   MessageCircle, 
+  UserCircle2, 
   MousePointer2, 
-  Users, 
-  TrendingUp, 
   DollarSign, 
-  BarChart3,
-  Layers,
-  ArrowUpRight
+  Eye, 
+  Target,
+  LayoutDashboard
 } from 'lucide-react';
 
-const rawData = [
-  { nombre: "Hay lugares que no se visitan una sola vez...", resultados: 4491, indicador: "Interacciones", costo: 33.39, gasto: 149969, alcance: 37561 },
-  { nombre: "Cuando el sushi se ve así... sabes que va a ser increíble", resultados: 34, indicador: "Mensajes WhatsApp", costo: 4411.76, gasto: 150000, alcance: 14998 },
-  { nombre: "Si vienes a Autor este febrero, empieza por aquí", resultados: 1016, indicador: "Interacciones", costo: 147.63, gasto: 150000, alcance: 42876 },
-  { nombre: "No sabemos qué día cumples años (A)", resultados: 64, indicador: "Mensajes WhatsApp", costo: 2319.40, gasto: 148442, alcance: 9494 },
-  { nombre: "Antes de ser cócteles, fueron intuición", resultados: 302, indicador: "Interacciones", costo: 331.12, gasto: 100000, alcance: 38892 },
-  { nombre: "Después de una buena cena, siempre viene la tarta de queso", resultados: 2162, indicador: "Interacciones", costo: 69.00, gasto: 149190, alcance: 159636 },
-  { nombre: "En Autor creamos celebraciones estilo Pinterest", resultados: 64, indicador: "Mensajes WhatsApp", costo: 2342.12, gasto: 149896, alcance: 18055 },
-  { nombre: "No sabemos qué día cumples años... (B)", resultados: 33, indicador: "Mensajes WhatsApp", costo: 2483.75, gasto: 81964, alcance: 6869 },
-  { nombre: "Algo nuevo está por llegar a Autor", resultados: 410, indicador: "visitas al perfil", costo: 132.97, gasto: 54518, alcance: 10549 },
+// Datos extraídos de la campaña de AutoR Cúcuta
+const campaignsData = [
+  { name: "No sabemos qué día cumples años...", results: 24, type: "Mensajes a WhatsApp", cpr: 3248.79, spend: 77971, impressions: 10939, reach: 6811 },
+  { name: "Algo nuevo está por llegar a Autor", results: 280, type: "Visitas al Perfil", cpr: 162.41, spend: 45476, impressions: 14241, reach: 10003 },
+  { name: "Lo nuevo está por llegar a Autor... y no es cualquier lanzamiento", results: 800, type: "Visitas al Perfil", cpr: 120.75, spend: 96603, impressions: 34500, reach: 18871 },
+  { name: "Interacciones - Algo nuevo está por llegar a Autor", results: 1319, type: "Interacciones", cpr: 72.81, spend: 96039, impressions: 50360, reach: 20485 },
+  { name: "La espera terminó... nuestra nueva carta de autor ya está aquí", results: 77, type: "Mensajes a WhatsApp", cpr: 2597.35, spend: 199996, impressions: 36070, reach: 16818 },
+  { name: "Una nueva historia de sabores comienza en nuestra cocina", results: 1128, type: "Visitas al Perfil", cpr: 132.88, spend: 149891, impressions: 47480, reach: 24420 },
+  { name: "12/03/2026 - Porque cumplir años también es una excusa perfecta para celebrar la vida", results: 134, type: "Mensajes a WhatsApp", cpr: 1119.38, spend: 149998, impressions: 26228, reach: 15154 },
+  { name: "Historia Día del Hombre", results: 24, type: "Mensajes a WhatsApp", cpr: 4077.45, spend: 97859, impressions: 15230, reach: 10480 },
+  { name: "Celebrar tu cumpleaños en Autor es otro nivel", results: 102, type: "Mensajes a WhatsApp", cpr: 1470.37, spend: 149978, impressions: 47102, reach: 26438 },
+  { name: "Hay lugares a los que vienes a comer... y otros a vivir algo distinto (A)", results: 43, type: "Mensajes a WhatsApp", cpr: 3486.39, spend: 149915, impressions: 34877, reach: 18148 },
+  { name: "Hay lugares a los que vienes a comer... y otros a vivir algo distinto (B)", results: 55, type: "Mensajes a WhatsApp", cpr: 2727, spend: 149985, impressions: 31370, reach: 14459 },
+  { name: "El primer bocado lo cambia todo", results: 1279, type: "Visitas al Perfil", cpr: 117.26, spend: 149985, impressions: 72306, reach: 40038 },
+  { name: "Si no sabes qué pedir... empieza por aquí", results: 46, type: "Mensajes a WhatsApp", cpr: 3260.86, spend: 150000, impressions: 24042, reach: 10847 }
 ];
 
-const App = () => {
+const StatCard = ({ title, value, icon: Icon, colorClass }) => (
+  <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-md">
+    <div className="flex items-center justify-between mb-4">
+      <div className={`p-3 rounded-xl ${colorClass}`}>
+        <Icon size={24} />
+      </div>
+      <span className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Métrica Total</span>
+    </div>
+    <h3 className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">{title}</h3>
+    <p className="text-2xl font-bold text-zinc-900 dark:text-white mt-1">{value}</p>
+  </div>
+);
+
+export default function App() {
   const totals = useMemo(() => {
-    const categories = {
-      "Mensajes WhatsApp": { count: 0, spend: 0, res: 0 },
-      "Interacciones": { count: 0, spend: 0, res: 0 },
-      "visitas al perfil": { count: 0, spend: 0, res: 0 }
-    };
-
-    let totalSpend = 0;
-    let totalReach = 0;
-
-    rawData.forEach(item => {
-      categories[item.indicador].count += 1;
-      categories[item.indicador].spend += item.gasto;
-      categories[item.indicador].res += item.resultados;
-      totalSpend += item.gasto;
-      totalReach += item.alcance;
-    });
-
-    return { categories, totalSpend, totalReach };
+    return campaignsData.reduce((acc, curr) => {
+      acc.spend += curr.spend;
+      acc.impressions += curr.impressions;
+      acc.reach += curr.reach;
+      if (curr.type === "Mensajes a WhatsApp") acc.whatsapp += curr.results;
+      if (curr.type === "Visitas al Perfil") acc.visits += curr.results;
+      if (curr.type === "Interacciones") acc.interacts += curr.results;
+      return acc;
+    }, { spend: 0, impressions: 0, reach: 0, whatsapp: 0, visits: 0, interacts: 0 });
   }, []);
 
   const formatCurrency = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
   const formatNumber = (val) => new Intl.NumberFormat('es-CO').format(val);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
-      {/* Header */}
-      <header className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Informe de Rendimiento Publicitario</h1>
-          <p className="text-slate-500 mt-1 uppercase text-xs font-semibold tracking-widest">Resumen ejecutivo para Cliente - Autor</p>
-        </div>
-        <div className="flex items-center gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-          <div className="bg-indigo-100 p-2 rounded-lg">
-            <DollarSign className="w-5 h-5 text-indigo-600" />
-          </div>
+    <div className="min-h-screen bg-zinc-50 dark:bg-black p-4 md:p-8 font-sans text-zinc-900 dark:text-zinc-100 w-full">
+      <header className="max-w-7xl mx-auto mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase">Inversión Total</p>
-            <p className="text-lg font-bold text-slate-800">{formatCurrency(totals.totalSpend)}</p>
+            <h1 className="text-3xl font-extrabold tracking-tight mb-2">AutoR Cúcuta</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-2 text-sm md:text-base">
+              <LayoutDashboard size={18} className="text-orange-500" />
+              Informe Consolidado de Métricas - AutoR Cúcuta
+            </p>
+          </div>
+          <div className="flex items-center gap-3 bg-white dark:bg-zinc-900 p-2 rounded-full border border-zinc-200 dark:border-zinc-800 px-4 w-fit">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs md:text-sm font-bold">Resumen de Campaña Activa</span>
           </div>
         </div>
       </header>
 
-      {/* KPI Cards */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <KPICard 
-          title="Mensajes WhatsApp" 
-          value={totals.categories["Mensajes WhatsApp"].res} 
-          subValue={`Costo Prom: ${formatCurrency(totals.categories["Mensajes WhatsApp"].spend / totals.categories["Mensajes WhatsApp"].res)}`}
-          icon={<MessageCircle className="w-6 h-6 text-emerald-600" />}
-          color="bg-emerald-50"
-        />
-        <KPICard 
-          title="Interacciones" 
-          value={formatNumber(totals.categories["Interacciones"].res)} 
-          subValue={`Costo Prom: ${formatCurrency(totals.categories["Interacciones"].spend / totals.categories["Interacciones"].res)}`}
-          icon={<MousePointer2 className="w-6 h-6 text-blue-600" />}
-          color="bg-blue-50"
-        />
-        <KPICard 
-          title="Visitas al Perfil" 
-          value={totals.categories["visitas al perfil"].res} 
-          subValue={`Costo Prom: ${formatCurrency(totals.categories["visitas al perfil"].spend / totals.categories["visitas al perfil"].res)}`}
-          icon={<Users className="w-6 h-6 text-purple-600" />}
-          color="bg-purple-50"
-        />
-        <KPICard 
-          title="Alcance Total" 
-          value={formatNumber(totals.totalReach)} 
-          subValue="Personas alcanzadas"
-          icon={<BarChart3 className="w-6 h-6 text-orange-600" />}
-          color="bg-orange-50"
-        />
-      </div>
+      <main className="max-w-7xl mx-auto space-y-8">
+        {/* Grid de KPIs principales */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard 
+            title="Inversión Total" 
+            value={formatCurrency(totals.spend)} 
+            icon={DollarSign} 
+            colorClass="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30"
+          />
+          <StatCard 
+            title="Mensajes WhatsApp" 
+            value={formatNumber(totals.whatsapp)} 
+            icon={MessageCircle} 
+            colorClass="bg-blue-100 text-blue-600 dark:bg-blue-950/30"
+          />
+          <StatCard 
+            title="Visitas al Perfil" 
+            value={formatNumber(totals.visits)} 
+            icon={UserCircle2} 
+            colorClass="bg-purple-100 text-purple-600 dark:bg-purple-950/30"
+          />
+          <StatCard 
+            title="Interacciones" 
+            value={formatNumber(totals.interacts)} 
+            icon={MousePointer2} 
+            colorClass="bg-orange-100 text-orange-600 dark:bg-orange-950/30"
+          />
+        </section>
 
-      {/* Main Content Grid */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Detail Table */}
-        <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+        {/* Alcance e Impresiones */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-zinc-900 text-white p-6 rounded-2xl flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-sm mb-1 font-medium">Total Alcance</p>
+              <h4 className="text-3xl font-bold">{formatNumber(totals.reach)}</h4>
+            </div>
+            <Target size={40} className="text-zinc-700" />
+          </div>
+          <div className="bg-zinc-900 text-white p-6 rounded-2xl flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-sm mb-1 font-medium">Total Impresiones</p>
+              <h4 className="text-3xl font-bold">{formatNumber(totals.impressions)}</h4>
+            </div>
+            <Eye size={40} className="text-zinc-700" />
+          </div>
+        </div>
+
+        {/* Tabla de Resultados Detallada */}
+        <section className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
             <h2 className="text-lg font-bold flex items-center gap-2">
-              <Layers className="w-5 h-5 text-indigo-500" />
-              Desglose por Campaña
+              <BarChart3 size={20} className="text-orange-500" />
+              Desglose de Campañas (13)
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
-                <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                  <th className="px-6 py-4">Campaña</th>
-                  <th className="px-6 py-4">Resultados</th>
-                  <th className="px-6 py-4">Costo/R</th>
-                  <th className="px-6 py-4">Inversión</th>
+                <tr className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-4 font-semibold">Campaña</th>
+                  <th className="px-6 py-4 font-semibold text-center">Tipo de Resultado</th>
+                  <th className="px-6 py-4 font-semibold text-right">Cantidad</th>
+                  <th className="px-6 py-4 font-semibold text-right">Costo / Res.</th>
+                  <th className="px-6 py-4 font-semibold text-right">Inversión</th>
+                  <th className="px-6 py-4 font-semibold text-right">Alcance</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
-                {rawData.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {campaignsData.map((camp, idx) => (
+                  <tr key={idx} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
                     <td className="px-6 py-4">
-                      <p className="text-sm font-semibold text-slate-700 truncate max-w-xs">{item.nombre}</p>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                        item.indicador.includes('Mensajes') ? 'bg-emerald-100 text-emerald-700' : 
-                        item.indicador.includes('Interacciones') ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                      <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200 line-clamp-1 max-w-[250px]">{camp.name}</p>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase ${
+                        camp.type === "Mensajes a WhatsApp" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
+                        camp.type === "Visitas al Perfil" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300" :
+                        "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
                       }`}>
-                        {item.indicador}
+                        {camp.type}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-bold text-slate-800">{formatNumber(item.resultados)}</p>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-sm font-bold text-zinc-900 dark:text-white">{formatNumber(camp.results)}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {formatCurrency(item.costo)}
+                    <td className="px-6 py-4 text-right font-mono text-sm text-zinc-600 dark:text-zinc-400">
+                      {formatCurrency(camp.cpr)}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-slate-800">
-                      {formatCurrency(item.gasto)}
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-sm font-semibold text-zinc-900 dark:text-white">{formatCurrency(camp.spend)}</span>
+                    </td>
+                    <td className="px-6 py-4 text-right text-zinc-500 text-sm">
+                      {formatNumber(camp.reach)}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        {/* Breakdown Panel */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-            <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-indigo-500" />
-              Costo por Objetivo
-            </h3>
-            <div className="space-y-6">
-              <MetricProgress 
-                label="WhatsApp" 
-                cost={totals.categories["Mensajes WhatsApp"].spend / totals.categories["Mensajes WhatsApp"].res} 
-                max={5000}
-                color="bg-emerald-500"
-              />
-              <MetricProgress 
-                label="Interacciones" 
-                cost={totals.categories["Interacciones"].spend / totals.categories["Interacciones"].res} 
-                max={5000}
-                color="bg-blue-500"
-              />
-              <MetricProgress 
-                label="Visitas Perfil" 
-                cost={totals.categories["visitas al perfil"].spend / totals.categories["visitas al perfil"].res} 
-                max={5000}
-                color="bg-purple-500"
-              />
-            </div>
-          </div>
-
-          <div className="bg-indigo-600 p-6 rounded-3xl shadow-lg text-white relative overflow-hidden">
-            <div className="relative z-10">
-              <h4 className="text-indigo-100 text-xs font-bold uppercase tracking-widest mb-1">Alcance Total</h4>
-              <p className="text-4xl font-bold mb-4">{formatNumber(totals.totalReach)}</p>
-              <div className="flex items-center gap-2 text-indigo-100 text-sm">
-                <ArrowUpRight className="w-4 h-4" />
-                <span>Usuarios impactados este periodo</span>
-              </div>
-            </div>
-            {/* Abstract Background element */}
-            <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
-          </div>
-        </div>
-
-      </div>
+        {/* Footer */}
+        <footer className="text-center py-10">
+          <p className="text-zinc-400 text-sm">
+            Informe generado para AutoR Cúcuta • AutoR Cúcuta • 2026
+          </p>
+        </footer>
+      </main>
     </div>
   );
-};
-
-const KPICard = ({ title, value, subValue, icon, color }) => (
-  <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between h-full hover:border-slate-300 transition-all">
-    <div className={`w-12 h-12 ${color} rounded-2xl flex items-center justify-center mb-4`}>
-      {icon}
-    </div>
-    <div>
-      <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">{title}</h3>
-      <p className="text-2xl font-black text-slate-800">{value}</p>
-      <p className="text-[11px] text-slate-500 mt-2 font-medium">{subValue}</p>
-    </div>
-  </div>
-);
-
-const MetricProgress = ({ label, cost, max, color }) => (
-  <div className="space-y-2">
-    <div className="flex justify-between items-end">
-      <span className="text-sm font-bold text-slate-600">{label}</span>
-      <span className="text-sm font-black text-slate-800">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(cost)}</span>
-    </div>
-    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-      <div 
-        className={`${color} h-full rounded-full transition-all duration-1000`} 
-        style={{ width: `${Math.min((cost / max) * 100, 100)}%` }}
-      ></div>
-    </div>
-  </div>
-);
-
-export default App;
+}
