@@ -2,14 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+::-webkit-scrollbar-track {
+  background: #11141a;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3241;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #cfa86b;
 }
